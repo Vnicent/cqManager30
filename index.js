@@ -1,5 +1,10 @@
 const express = require('express');
 const dbHelper = require('./libs/dbHelper');
+const multer = require('multer');
+const upload = multer({
+    dest: 'views/imgs/'
+});
+const path = require('path');
 const app = express();
 
 app.use(express.static('views'));
@@ -30,19 +35,35 @@ app.get('/heroList', (req, res) => {
     })
 })
 
-app.get('/heroDetail',(req,res)=>{
+app.get('/heroDetail', (req, res) => {
     const id = req.query.id;
-    dbHelper.find('cqlist',{_id:dbHelper.ObjectId(id)},result=>{
+    dbHelper.find('cqlist', {
+        _id: dbHelper.ObjectId(id)
+    }, result => {
         res.send(result);
     })
 })
 
-app.get('/heroDelete',(req,res)=>{
+app.get('/heroDelete', (req, res) => {
     const id = req.query.id;
-    dbHelper.deleteOne('cqlist',{_id:dbHelper.ObjectId(id)},result=>{
+    dbHelper.deleteOne('cqlist', {
+        _id: dbHelper.ObjectId(id)
+    }, result => {
         res.send({
-            msg:"删除成功",
-            code:200
+            msg: "删除成功",
+            code: 200
+        })
+    })
+})
+
+app.post('/heroAdd', upload.single('heroIcon'), (req, res) => {
+    const heroName = req.query.heroName;
+    const skillName = req.query.skillName;
+    const heroIcon = path.join('imgs', req.file.filename);
+    dbHelper.insertOne('cqlist',{heroName,skillName,heroIcon},result=>{
+        res.send({
+            code:200,
+            msg:"添加成功"
         })
     })
 })
