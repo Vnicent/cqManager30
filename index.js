@@ -36,4 +36,14 @@ app.get('/heroDetail',(req,res)=>{
         res.send(result);
     })
 })
+
+app.get('/heroDelete',(req,res)=>{
+    const id = req.query.id;
+    dbHelper.deleteOne('cqlist',{_id:dbHelper.ObjectId(id)},result=>{
+        res.send({
+            msg:"删除成功",
+            code:200
+        })
+    })
+})
 app.listen(8848);
