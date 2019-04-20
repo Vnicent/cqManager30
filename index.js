@@ -29,4 +29,11 @@ app.get('/heroList', (req, res) => {
         })
     })
 })
+
+app.get('/heroDetail',(req,res)=>{
+    const id = req.query.id;
+    dbHelper.find('cqlist',{_id:dbHelper.ObjectId(id)},result=>{
+        res.send(result);
+    })
+})
 app.listen(8848);
