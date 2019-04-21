@@ -14,6 +14,7 @@ app.get('/heroList', (req, res) => {
     const pagesize = req.query.pagesize;
     const query = req.query.query;
     dbHelper.find('cqlist', {}, result => {
+        result = result.reverse();
         const queryList = result.filter(v => {
             if (v.heroName.indexOf(query) != -1 || v.skillName.indexOf(query) != -1) {
                 return true;
@@ -57,13 +58,39 @@ app.get('/heroDelete', (req, res) => {
 })
 
 app.post('/heroAdd', upload.single('heroIcon'), (req, res) => {
-    const heroName = req.query.heroName;
-    const skillName = req.query.skillName;
+    const heroName = req.body.heroName;
+    const skillName = req.body.skillName;
     const heroIcon = path.join('imgs', req.file.filename);
-    dbHelper.insertOne('cqlist',{heroName,skillName,heroIcon},result=>{
+    dbHelper.insertOne('cqlist', {
+        heroName,
+        skillName,
+        heroIcon
+    }, result => {
         res.send({
-            code:200,
-            msg:"添加成功"
+            code: 200,
+            msg: "添加成功"
+        })
+    })
+})
+
+app.post('/heroUpdate', upload.single('heroIcon'), (req, res) => {
+    const heroName = req.body.heroName;
+    const skillName = req.body.skillName;
+    const id = req.body.id;
+    let updateData = {
+        heroName,
+        skillName
+    };
+    if (req.file) {
+        const heroIcon = path.join('imgs', req.file.filename);
+        updateData.heroIcon = heroIcon;
+    }
+    dbHelper.updateOne('cqlist', {
+        _id: dbHelper.ObjectId(id)
+    }, updateData, result => {
+        res.send({
+            msg: "修改成功",
+            code: 200
         })
     })
 })
