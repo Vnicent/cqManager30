@@ -162,7 +162,7 @@
         id
       },
       success:function(obj){
-        // console.log(obj);
+        console.log(obj);
         $('form #heroName').val(obj[0].heroName);
         $('form #skillName').val(obj[0].skillName);
         $('input[name=id]').val(obj[0]._id);
@@ -189,6 +189,11 @@
 
     $('.btn-cancel').click(function() {
       window.location.href = './index.html'
+    })
+
+    $('#heroIcon').change(function(event){
+      const url = URL.createObjectURL(event.target.files[0]);
+      $('.preview').attr('src',url);
     })
   })
 </script>

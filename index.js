@@ -1,6 +1,7 @@
 const express = require('express');
 const dbHelper = require('./libs/dbHelper');
 const bodyParser = require('body-parser');
+var svgCaptcha = require('svg-captcha');
 const multer = require('multer');
 const upload = multer({
     dest: 'views/imgs/'
@@ -114,4 +115,13 @@ app.post('/register',(req,res)=>{
         }
     })
 })
+
+app.get('/captcha', function (req, res) {
+	var captcha = svgCaptcha.create();
+	// req.session.captcha = captcha.text;
+	console.log(captcha.text);
+	res.type('svg');
+	res.status(200).send(captcha.data);
+});
+
 app.listen(8848);
