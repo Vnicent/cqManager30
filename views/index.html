@@ -43,6 +43,10 @@
       width: 50px;
       height: 50px;
     }
+
+    .username {
+      color: hotpink;
+    }
   </style>
 </head>
 
@@ -67,7 +71,7 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
               <p class="navbar-text navbar-right " style="font-weight: 700">
-                欢迎 【jack】登录
+                欢迎 【 <span class="username">jack</span> 】登录
                 <a href="#" class="logout">退出</a>
               </p>
             </div>
@@ -188,6 +192,10 @@
         },
         success: function (obj) {
           // console.log(obj);
+          if(obj.code===400){
+            alert('请先登录');
+            location = './login.html';
+          }
           const html = template('tpl', obj);
           $('tbody').html(html);
           $('.pull-right .page-num a').text(pagenum + '/' + obj.totalPage);
@@ -243,6 +251,21 @@
           }
         })
       }
+    })
+
+    const username = location.search.split('=')[1];
+    $('.username').text(username);
+
+    $('.logout').on('click',function(){
+      $.ajax({
+        url: '/logout',
+        success:function(obj){
+          alert(obj.msg);
+          if(obj.code===200){
+            location = './login.html';
+          }
+        }
+      })
     })
   })
 </script>

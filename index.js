@@ -1,13 +1,35 @@
 const express = require('express');
 const dbHelper = require('./libs/dbHelper');
 const bodyParser = require('body-parser');
-var svgCaptcha = require('svg-captcha');
+const svgCaptcha = require('svg-captcha');
+const cookieSession = require('cookie-session')
 const multer = require('multer');
 const upload = multer({
     dest: 'views/imgs/'
 });
 const path = require('path');
 const app = express();
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2'],
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
+
+app.use((req,res,next)=>{
+    if(req.url.indexOf('/hero')===0){
+        if(req.session.username){
+            next();
+        }else{
+            res.send({
+                msg:'请先登录',
+                code:400
+            })
+        }
+    }else {
+        next();
+    }
+})
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static('views'));
@@ -118,10 +140,48 @@ app.post('/register',(req,res)=>{
 
 app.get('/captcha', function (req, res) {
 	var captcha = svgCaptcha.create();
-	// req.session.captcha = captcha.text;
-	console.log(captcha.text);
+	req.session.vcode = captcha.text;
+	// console.log(captcha.text);
 	res.type('svg');
 	res.status(200).send(captcha.data);
 });
 
+app.post('/login',(req,res)=>{
+    const username = req.body.username;
+    const password = req.body.password;
+    const vcode = req.body.vcode;
+    if(vcode.toLowerCase()===req.session.vcode.toLowerCase()){
+        dbHelper.find('userlist',{
+            username,
+            password
+        },result=>{
+            if(result.length!=0){
+                req.session.username = username;
+                res.send({
+                    msg:'登录成功',
+                    code:200,
+                    username
+                })
+            }else {
+                res.send({
+                    msg:'用户名或密码错误,请重新登录',
+                    code:400
+                })
+            }
+        })
+    }else {
+        res.send({
+            msg:'验证码错误,重新填写验证码',
+            code:401
+        })
+    }
+})
+
+app.get('/logout',(req,res)=>{
+    req.session = null;
+    res.send({
+        msg:'已退出',
+        code:200
+    })
+})
 app.listen(8848);
