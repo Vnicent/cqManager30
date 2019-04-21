@@ -1,5 +1,6 @@
 const express = require('express');
 const dbHelper = require('./libs/dbHelper');
+const bodyParser = require('body-parser');
 const multer = require('multer');
 const upload = multer({
     dest: 'views/imgs/'
@@ -7,6 +8,7 @@ const upload = multer({
 const path = require('path');
 const app = express();
 
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static('views'));
 
 app.get('/heroList', (req, res) => {
@@ -92,6 +94,24 @@ app.post('/heroUpdate', upload.single('heroIcon'), (req, res) => {
             msg: "修改成功",
             code: 200
         })
+    })
+})
+
+app.post('/register',(req,res)=>{
+    dbHelper.find('userlist',{username:req.body.username},result=>{
+        if(result.length===0){
+            dbHelper.insertOne('userlist',req.body,result=>{
+                res.send({
+                    msg:'注册成功',
+                    code:200
+                })
+            })
+        }else {
+            res.send({
+                msg:'该账号已存在,请重新注册',
+                code:400
+            })
+        }
     })
 })
 app.listen(8848);
